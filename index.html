@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textarea and Button Example</title>
+    <style> 
+      * {
+        font-family: 'Segoe UI';
+      }
+      
+      body {   
+        background-color: #485fc7;
+        text-align: center;
+      }
+      
+      h1, h2 {
+        color: white;
+      }
+      
+      h1 {
+        font-size: 24px;
+        font-weight: 700;
+      }
+      
+      h2 {
+        font-size: 20px;
+        font-weight: 400;
+      }
+      
+      textarea, button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 10px;
+      }
+      
+      textarea {
+        border-radius: 4px;
+        font-family: 'Segoe UI';
+        font-size: 15px;
+        padding: 10px;
+      }
+      
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        font-family: 'Segoe UI';
+        font-size: 20px;
+        padding: 10px 20px;
+      }
+    </style>
+</head>
+<body>
+  <h1>Mamafy</h1>
+  <h2>Convert text to something your mama would type.</h2>
+  <textarea id="input-textarea" rows="8" cols="100"></textarea>
+  <button id="submit-button" onclick="parseText()">Convert text</button>
+  <textarea id="output-textarea" rows="8" cols="100"></textarea>
+  <button id="clear-button" onclick="copyToClipboard()">Copy to clipboard</button>
+  <script>
+    function removePunctuation(inputString) {
+      // Define a regular expression to match the specified punctuation characters
+      const punctuationRegex = /[.,?!']/g;
+      
+      // Remove the punctuation characters from the input string
+      const cleanedString = inputString.replace(punctuationRegex, '');
+      
+      return cleanedString;
+    }
+    
+    function parseLine(line) {
+      var vowels = 'aeiou';
+      var cleanLine = removePunctuation(line);
+      var lineWords = cleanLine.split(' ');
+      let lineList = [];
+      for (const word of lineWords) {
+        let initialWord = word;
+        let newWord = '';
+        let isFirstTime = true;
+        let wordVowels = [...initialWord.toLowerCase()].filter(x => vowels.includes(x));
+        let vowelCount = wordVowels.length;
+        
+        if (initialWord.toLowerCase().startsWith('si')) {
+            let isPrefixLower = initialWord[0].toLowerCase() === initialWord[0];
+            initialWord = (isPrefixLower ? 'c' : 'C') + initialWord.slice(2);
+        }
+        
+        if (initialWord.toLowerCase().includes('ex')) {
+            initialWord = initialWord.replace(/ex/g, 'x').replace(/Ex/g, 'X').replace(/EX/g, 'X');
+        }
+        
+        for (let i = 0; i < initialWord.length; i++) {
+            let letter = initialWord[i];
+            let prevLetter = i > 0 ? initialWord[i - 1] : ' ';
+            let nextLetter = i < initialWord.length - 1 ? initialWord[i + 1] : ' ';
+            let isVowel = vowels.includes(letter.toLowerCase());
+            let noVowelBeside = !vowels.includes(prevLetter.toLowerCase()) && !vowels.includes(nextLetter.toLowerCase());
+            let notLastVowel = initialWord.slice(i + 1).toLowerCase().split('').some(x => wordVowels.includes(x));
+            
+            if (isVowel && vowelCount > 1 && i > 0 && noVowelBeside && notLastVowel) {
+                if (isFirstTime) {
+                    isFirstTime = false;
+                } else {
+                    newWord += Math.random() < 0.67 ? letter : '';
+                }
+            } else {
+                newWord += letter;
+            }
+        }
+        lineList.push(newWord);
+      }
+    return lineList.join(' ');
+    }
+  
+  function parseText() {
+      var textareaContent = document.getElementById("input-textarea").value;
+      var lineArray = textareaContent.split('\n');
+      var outputArray = [];
+      lineArray.forEach((line) => {
+        outputArray.push(parseLine(line));
+      });
+      var outputTextarea = document.getElementById("output-textarea");
+      outputTextarea.innerHTML = '';
+      outputTextarea.innerHTML = outputArray.join('\n');
+      }
+  
+  function copyToClipboard() {
+    var copyText = document.getElementById("output-textarea");
+    navigator.clipboard.writeText(copyText.value);
+    alert("Copied output to clipboard.");
+  }
+  </script>
+</body>
+</html>
